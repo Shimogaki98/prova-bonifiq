@@ -25,7 +25,7 @@ namespace ProvaPub.Controllers
         }
 
         [HttpPost("orders")]
-        public async Task<Order> PlaceOrder(string paymentMethod, decimal paymentValue, int customerId)
+        public async Task<Order> PlaceOrder(string paymentMethod, decimal paymentValue, int customerId) 
         {
 
             var paymentClass = _paymentService.CreatePaymentClass(paymentMethod);
