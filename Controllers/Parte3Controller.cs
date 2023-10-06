@@ -18,10 +18,10 @@ namespace ProvaPub.Controllers
         private readonly OrderService _orderService;
         private readonly IPaymentService _paymentService;
 
-        public Parte3Controller()
+        public Parte3Controller(IPaymentService paymentService, OrderService orderService)
         {
-            _orderService = new OrderService();
-            _paymentService = new PaymentService();
+            _orderService = orderService;
+            _paymentService = paymentService;
         }
 
         [HttpPost("orders")]
