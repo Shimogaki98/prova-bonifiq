@@ -1,12 +1,20 @@
 ﻿using ProvaPub.Models;
+using ProvaPub.Services.Interfaces;
+using ProvaPub.Strategy.PaymentStrategy;
 
 namespace ProvaPub.Services
 {
-    public class OrderService
+    public class OrderService : IOrderService
     {
-        public async Task<Order> PayOrder(IPaymentMethod paymentMethod, decimal paymentValue, int customerId)
+        PaymentStrategy _paymentStrategy;
+        public OrderService(PaymentStrategy paymentStrategy)
         {
-            paymentMethod.Pay(paymentValue, customerId);
+            _paymentStrategy = paymentStrategy;
+        }
+
+        public async Task<Order> PayOrder(string paymentMethod, decimal paymentValue, int customerId)
+        {
+            _paymentStrategy.Pay(paymentValue, customerId, paymentMethod);
 
             return await Task.FromResult(new Order()
             {
@@ -15,66 +23,5 @@ namespace ProvaPub.Services
             });
         }
     }
-
-    // Abstração para possível extensão de metodos de pagamento, sem alterar o método "Original" respeitando o princípio Open-Closed 
-
-    public interface IPaymentMethod
-    {
-        public void Pay(decimal paymentValue, int customerId);
-    }
-
-    public class Pix : IPaymentMethod
-    {
-        public void Pay(decimal paymentValue, int customerId)
-        {
-            // Pay with Pix
-        }
-    }
-    public class CreditCard : IPaymentMethod
-    {
-        public void Pay(decimal paymentValue, int customerId)
-        {
-            // Pay with Credit Card
-        }
-    }
-
-    public class Paypal : IPaymentMethod
-    {
-        public void Pay(decimal paymentValue, int customerId)
-        {
-            // Pay with Paypal
-        }
-    }
-
-
-    // Service e factory para evitar IF nos Controllers e Services
-    public interface IPaymentService
-    {
-        IPaymentMethod CreatePaymentClass(string payment);
-    }
-
-    public class PaymentService : IPaymentService
-    {
-        private readonly Dictionary<string, Func<IPaymentMethod>> _PaymentMethodFactories;
-
-        public PaymentService()
-        {
-            _PaymentMethodFactories = new Dictionary<string, Func<IPaymentMethod>>
-        {
-            { "pix".ToLower(), () => new Pix() },
-            { "creditcard".ToLower(), () => new CreditCard() },
-            { "paypal".ToLower(), () => new Paypal() },
-        };
-        }
-
-        public IPaymentMethod CreatePaymentClass(string payment)
-        {
-            if (_PaymentMethodFactories.TryGetValue(payment, out var factory))
-            {
-                return factory();
-            }
-
-            throw new ArgumentException("Invalid Payment Method");
-        }
-    }
 }
+

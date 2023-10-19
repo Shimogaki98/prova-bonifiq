@@ -3,6 +3,8 @@ using ProvaPub.Repository;
 using ProvaPub.Repository.Interfaces;
 using ProvaPub.Services;
 using ProvaPub.Services.Interfaces;
+using ProvaPub.Strategy.PaymentStrategy;
+using ProvaPub.Strategy.PaymentStrategy.PaymentMethod;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -15,14 +17,19 @@ builder.Services.AddSwaggerGen();
 
 builder.Services.AddSingleton<RandomService>();
 builder.Services.AddScoped<ProductService>();
-builder.Services.AddScoped<OrderService>();
+builder.Services.AddScoped<IOrderService, OrderService>();
 builder.Services.AddScoped<ICustomerService, CustomerService>();
+builder.Services.AddScoped<IPaymentStrategy, PaymentPix>();
+builder.Services.AddScoped<IPaymentStrategy, PaymentPaypal>();
+builder.Services.AddScoped<IPaymentStrategy, PaymentCreditCard>();
+builder.Services.AddScoped<PaymentStrategy>();
 
-builder.Services.AddTransient<IPaymentService, PaymentService>();
+
 builder.Services.AddTransient<ICustomerRepository, CustomerRepository>();
 
 builder.Services.AddDbContext<TestDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("ctx")));
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
